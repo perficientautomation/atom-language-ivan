@@ -3,7 +3,7 @@ fileTypes: [
   ".ivan",
   ".txt
 ]
-name: "Ivan Programming Language"
+name: "Ivan"
 patterns: [
   { include: "#line" }
 ]
