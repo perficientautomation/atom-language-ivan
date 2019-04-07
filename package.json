@@ -2,10 +2,10 @@
   "name": "language-ivan",
   "version": "0.0.1",
   "description": "Language support for Ivan",
-  "homepage": "",
+  "homepage": "https://github.com/perficientautomation/atom-language-ivan.git",
   "repository": {
     "type": "git",
-    "url": "https://github.com/damieng/atom-language-bbcbasic.git"
+    "url": "https://github.com/perficientautomation/atom-language-ivan.git"
   },
   "license": "",
   "keywords": [

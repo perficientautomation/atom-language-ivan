@@ -1,6 +1,7 @@
 scopeName: 'source.ivan'
 fileTypes: [
-  '.bas'
+  '.ivan',
+  '.txt
 ]
 name: 'Ivan Programming Language'
 patterns: [
