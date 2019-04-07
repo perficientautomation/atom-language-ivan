@@ -1,0 +1,1014 @@
+scopeName: 'source.ivan'
+fileTypes: [
+  '.bas'
+]
+name: 'Ivan Programming Language'
+patterns: [
+  { include: '#line' }
+]
+repository:
+  invalid:
+    match: '[^\\s:]+'
+    name: 'invalid.illegal.ivan'
+  line:
+    match: '^\\s*(\\d+)?\\s*(.*)'
+    captures:
+      '1':
+        name: 'meta.line.number.ivan'
+      '2':
+        patterns: [
+          {
+            name: 'meta.multi-statement.punctation.ivan'
+            match: '\\s*:\\s*'
+          }
+          {
+            include: '#statement'
+          }
+        ]
+  statement:
+    patterns: [
+      {
+        begin: '(PROC)([A-Za-z]+[A-Za-z0-9_]*)'
+        beginCaptures:
+          1:
+            name: 'keyword.control.ivan'
+          2:
+            name: 'entity.function.name.ivan'
+        patterns: [
+          { include: '#stringVariableName' }
+          { include: '#numericVariableName' }
+          { match: ',' }
+        ]
+        end: '(?=:)'
+      }
+      { include: '#keywords' }
+      { include: '#assignment' }
+      {
+        match: '\\s*[=](.+)'
+        captures:
+          1:
+            patterns: [
+              { include: '#stringVariableName' }
+              { include: '#integerVariableName' }
+              { include: '#numericVariableName' }
+            ]
+      }
+      { include: '#starCommands' }
+      { include: '#invalid' }
+    ]
+  starCommands:
+    begin: '(\\*[A-Z]+)\\s*'
+    beginCaptures:
+      1:
+        name: 'support.function.ivan'
+    patterns: [
+      { include: '#numericSource' }
+    ]
+    end: '(?=:)'
+  assignment:
+    patterns: [
+      {
+        name: 'meta.string-assignment.ivan'
+        begin: '(LET\\s*)?([A-Za-z]+[0-9A-Za-z_]*[$])\\s*=\\s*'
+        beginCaptures:
+          1:
+            name: 'keyword.assignment.ivan'
+          2:
+            patterns: [
+              { include: '#stringVariableName' }
+            ]
+        end: '\\:'
+        patterns: [
+          { include: '#stringSource' }
+        ]
+      }
+      {
+        name: 'meta.integer-assignment.ivan'
+        begin: '(LET\\s*)?(([A-Za-z]+[0-9A-Za-z_]*|@)[%])\\s*=\\s*'
+        beginCaptures:
+          1:
+            name: 'keyword.assignment.cs'
+          2:
+            patterns: [
+              { include: '#integerVariableName' }
+            ]
+        patterns: [
+          { include: '#numericOnlySource' }
+        ]
+        end: '\\:'
+      }
+      {
+        name: 'meta.real-assignment.ivan'
+        begin: '(LET\\s*)?([A-Za-z]+[0-9A-Za-z_]*)\\s*=\\s*'
+        beginCaptures:
+          1:
+            name: 'keyword.assignment.cs'
+          2:
+            patterns: [
+              { include: '#numericVariableName' }
+            ]
+        end: '\\:'
+        patterns: [
+          { include: '#numericSource' }
+        ]
+      }
+    ]
+  keywords:
+    patterns: [
+      {
+        match: '(REM)(.*)'
+        captures:
+          1:
+            name: 'keyword.rem.ivan'
+          2:
+            name: 'comment.line.ivan'
+      }
+      {
+        name: 'meta.for.statement.ivan'
+        match: '(FOR)\\s*([a-zA-Z]+[a-zA-Z0-9]*[%]?)\\s*=(.+)(TO)(.+)(STEP)([^:]+)'
+        captures:
+          1:
+            name: 'keyword.control.ivan'
+          2:
+            patterns: [
+              { include: '#integerVariableName' }
+              { include: '#numericVariableName' }
+            ]
+          3:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+          4:
+            name: 'keyword.control.ivan'
+          5:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+          6:
+            name: 'keyword.control.ivan'
+          7:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        name: 'meta.for.statement.ivan'
+        match: '(FOR)\\s*([a-zA-Z]+[a-zA-Z0-9]*[%]?)\\s*=(.+)(TO)([^:]+)'
+        captures:
+          1:
+            name: 'keyword.control.ivan'
+          2:
+            patterns: [
+              { include: '#integerVariableName' }
+              { include: '#numericVariableName' }
+            ]
+          3:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+          4:
+            name: 'keyword.control.ivan'
+          5:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        name: 'meta.print-input.block.ivan'
+        begin: '(PRINT|INPUT)'
+        beginCaptures:
+          1:
+            name: 'keyword.io.ivan'
+        patterns: [
+          { include: '#formatFunctions' }
+          { include: '#stringSource' }
+          { include: '#numericSource' }
+          { include: '#invalid' }
+        ]
+        end: '(?=:)'
+      }
+      {
+        begin: '(CHAIN|LOAD|SAVE)'
+        beginCaptures:
+          1:
+            name: 'keyword.io.ivan'
+        patterns: [
+          { include: '#stringSource' }
+        ]
+        end: '(?=:)'
+      }
+      {
+        match: '(CLEAR|CLG|CLS|END\\s*PROC|END|STOP)\\s*'
+        captures:
+          1:
+            name: 'keyword.control.ivan'
+      }
+      {
+        match: '(NEXT)([^:]+)'
+        captures:
+          1:
+            name: 'keyword.control.ivan'
+          2:
+            patterns: [
+              { include: '#integerVariableName' }
+              { include: '#numericVariableName' }
+            ]
+      }
+      {
+        begin: '(CLOSE\\s*#|COLOUR|MODE|WIDTH)'
+        beginCaptures:
+          1:
+            name: 'keyword.io.ivan'
+        end: '(?=:)'
+        patterns: [
+          { include: '#numericOnlySource' }
+        ]
+      }
+      {
+        name: 'keyword.io.ivan'
+        begin: '(DRAW|GCOL|MOVE)\\s*(.+?)\\s*,\\s*(.+)'
+        beginCaptures:
+          1:
+            name: 'keyword.io.ivan'
+          2:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+          3:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+        end: '(?=:)'
+        patterns: [
+          { include: '#numericOnlySource' }
+        ]
+      }
+      {
+        name: 'keyword.io.ivan'
+        begin: '(PLOT)\\s*(.+)\\s*,\\s*(.+),\\s*(.+)'
+        beginCaptures:
+          1:
+            name: 'keyword.io.ivan'
+          2:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+          3:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+          4:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+        end: '(?=:)'
+        patterns: [
+          { include: '#numericOnlySource' }
+        ]
+      }
+      {
+        begin: '(MODE)(.+)'
+        beginCaptures:
+          1:
+            name: 'keyword.io.ivan'
+          2:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+        end: '(?=:)'
+      }
+      {
+        match: '(GOSUB|GOTO)([^:]+)'
+        captures:
+          1:
+            name: 'keyword.control.ivan'
+          2:
+            patterns: [
+              {
+                match: '\\s*[0-9]+\\b'
+                name: 'meta.line.number.ivan'
+              }
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        match: 'RUN|RETURN'
+        name: 'keyword.control.ivan'
+      }
+      {
+        match: '(BPUT\\s*#)(.+),([^:]+)'
+        captures:
+          1:
+            name: 'keyword.io.ivan'
+          2:
+            patterns: [
+              { include: '#numericVariableName' }
+            ]
+          3:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        begin: '(CALL)\\s*([^,:]+)'
+        beginCaptures:
+          1:
+            name: 'keyword.control.ivan'
+          2:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+        patterns: [
+          { include: ',' }
+          { include: '#stringSource' }
+          { include: '#numericSource' }
+        ]
+        end: '(?=:)'
+      }
+      {
+        begin: '(LOCAL)\\s*'
+        beginCaptures:
+          1:
+            name: 'keyword.ivan'
+        patterns: [
+          { include: ',' }
+          { include: '#stringVariableName' }
+          { include: '#integerVariableName' }
+          { include: '#numericVariableName' }
+        ]
+        end: '(?=:)'
+      }
+      {
+        begin: '(RESTORE)([^:]*)'
+        beginCaptures:
+          1:
+            name: 'keyword.data.ivan'
+          2:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+        end: '(?=:)'
+      }
+      {
+        match: 'TRACE\\s*(ON|OFF)'
+        name: 'keyword.control.ivan'
+      }
+      {
+        match: '(TRACE)\\s*([^:]+)'
+        captures:
+          1:
+            name: 'keyword.control.ivan'
+          2:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        match: 'ON\\s*ERROR\\s*OFF|REPORT'
+        name: 'keyword.control.ivan'
+      }
+      {
+        match: '(ON\\s*ERROR)([^:]*)'
+        captures:
+          1:
+            name: 'keyword.control.ivan'
+          2:
+            patterns: [
+              { include: '#statement' }
+            ]
+      }
+      {
+        match: '(ON)\\s*([A-Za-z]+[A-Za-z0-9]*)\\s*(GOTO|GOSUB)([^:]+)'
+        captures:
+          1:
+            name: 'keyword.control.ivan'
+          2:
+            patterns: [
+              { include: '#numericVariableName' }
+            ]
+          3:
+            name: 'keyword.control.ivan'
+          4:
+            patterns: [
+              { match: ',' }
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        match: '(REPEAT)([^:]+)'
+        captures:
+          1:
+            name: 'keyword.control.ivan'
+          2:
+            patterns: [
+              { include: '#statement' }
+            ]
+      }
+      {
+        match: '(UNTIL)([^:]+)'
+        captures:
+          1:
+            name: 'keyword.control.ivan'
+          2:
+            patterns: [
+              { include: '#condition' }
+            ]
+      }
+      {
+        name: 'keyword.control.ivan'
+        begin: 'IF(.+)THEN(.+)ELSE(.+)'
+        beginCaptures:
+          1:
+            patterns: [
+              { include: '#condition' }
+            ]
+          2:
+            patterns: [
+              { include: '#statement' }
+            ]
+          3:
+            patterns: [
+              { include: '#statement' }
+            ]
+        end: '(?=:)'
+      }
+      {
+        name: 'keyword.control.ivan'
+        begin: 'IF(.+)\\s+THEN(.*)'
+        beginCaptures:
+          1:
+            patterns: [
+              { include: '#condition' }
+            ]
+          2:
+            patterns: [
+              { include: '#statement' }
+            ]
+        end: '(?=:)'
+      }
+      {
+        begin: '(ENVELOPE)\\s*(.+?),(.+?),(.+?),(.+?),(.+?),(.+?),(.+?),(.+?),(.+?),(.+?),(.+?),(.+?),(.+?),(.+)'
+        beginCaptures:
+          1:
+            name: 'keyword.io.ivan'
+          2:
+            patterns: [ { include: '#numericOnlySource' } ]
+          3:
+            patterns: [ { include: '#numericOnlySource' } ]
+          4:
+            patterns: [ { include: '#numericOnlySource' } ]
+          5:
+            patterns: [ { include: '#numericOnlySource' } ]
+          6:
+            patterns: [ { include: '#numericOnlySource' } ]
+          7:
+            patterns: [ { include: '#numericOnlySource' } ]
+          8:
+            patterns: [ { include: '#numericOnlySource' } ]
+          9:
+            patterns: [ { include: '#numericOnlySource' } ]
+          10:
+            patterns: [ { include: '#numericOnlySource' } ]
+          11:
+            patterns: [ { include: '#numericOnlySource' } ]
+          12:
+            patterns: [ { include: '#numericOnlySource' } ]
+          13:
+            patterns: [ { include: '#numericOnlySource' } ]
+          14:
+            patterns: [ { include: '#numericOnlySource' } ]
+          15:
+            patterns: [ { include: '#numericOnlySource' } ]
+        end: '(?=:)'
+      }
+      {
+        begin: '(SOUND)\\s*(.+?),(.+?),(.+?),(.+)'
+        beginCaptures:
+          1:
+            name: 'keyword.io.ivan'
+          2:
+            patterns: [ { include: '#numericOnlySource' } ]
+          3:
+            patterns: [ { include: '#numericOnlySource' } ]
+          4:
+            patterns: [ { include: '#numericOnlySource' } ]
+          5:
+            patterns: [ { include: '#numericOnlySource' } ]
+        end: '(?=:)'
+      }
+      {
+        begin: '(READ)'
+        beginCaptures:
+          1:
+            name: 'keyword.data.ivan'
+        patterns: [
+          {
+            match: '[,]'
+          }
+          { include: '#stringVariableName' }
+          { include: '#numericVariableName' }
+        ]
+        end: '(?=:)'
+      }
+      {
+        begin: '(DATA)'
+        beginCaptures:
+          1:
+            name: 'keyword.data.ivan'
+        patterns: [
+          {
+            match: '[,]'
+          }
+          { include: '#stringSource' }
+          { include: '#numericSource' }
+        ]
+        end: '(?=:)'
+      }
+      {
+        begin: '(DEF\\s*FN)([A-Za-z]+[A-Za-z0-9_]*)([(].*[)])?'
+        beginCaptures:
+          1:
+            name: 'keyword.control.ivan'
+          2:
+            name: 'entity.function.name.ivan'
+          3:
+            name: 'meta.function.parameters.ivan'
+            patterns: [
+              { include: '#stringVariableName' }
+              { include: '#numericVariableName' }
+              { match: '[,]' }
+            ]
+        end: '(?=:)'
+      }
+      {
+        begin: '(DEF\\s*PROC)([A-Za-z]+[A-Za-z0-9_]*)([(].*[)])?'
+        beginCaptures:
+          1:
+            name: 'keyword.control.ivan'
+          2:
+            name: 'entity.function.name.ivan'
+          3:
+            patterns: [
+              { include: '#stringVariableName' }
+              { include: '#numericVariableName' }
+              { match: ',' }
+            ]
+        patterns: [
+          { include: '#line' }
+        ]
+        end: '(END\\s*PROC)'
+        endCaptures:
+          1:
+            name: 'keyword.control.ivan'
+      }
+      {
+        begin: '(DIM)\\s*([A-Za-z]+[A-Za-z0-9_]*[$%]?)\\s*[(]'
+        beginCaptures:
+          1:
+            name: 'keyword.data.ivan'
+          2:
+            patterns: [
+              { include: '#stringVariableName' }
+              { include: '#integerVariableName' }
+              { include: '#numericVariableName' }
+            ]
+        patterns: [
+          {
+            match: '[,]'
+          }
+          { include: '#numericOnlySource' }
+        ]
+        end: '[)]'
+      }
+      {
+        begin: '(VDU)(.*)'
+        beginCaptures:
+          1:
+            name: 'keyword.io.ivan'
+          2:
+            patterns: [
+              {
+                match: '[;,]'
+              }
+              { include: '#numericOnlySource' }
+            ]
+        end: '(?=:)'
+      }
+    ]
+  condition:
+    patterns: [
+      {
+        name: 'meta.conditional.test.ivan'
+        match: '(.+)\\s*(<>)\\s*(.+)'
+        captures:
+          1:
+            patterns: [
+              { include: '#stringSource' }
+              { include: '#numericSource' }
+            ]
+          2:
+            name: 'meta.conditional.punctuation.ivan'
+          3:
+            patterns: [
+              { include: '#stringSource' }
+              { include: '#numericSource' }
+            ]
+      }
+      {
+        name: 'meta.conditional.test.ivan'
+        match: '(.+)\\s*([=><])\\s*(.+)'
+        captures:
+          1:
+            patterns: [
+              { include: '#stringSource' }
+              { include: '#numericSource' }
+            ]
+          2:
+            name: 'meta.conditional.punctuation.ivan'
+          3:
+            patterns: [
+              { include: '#stringSource' }
+              { include: '#numericSource' }
+            ]
+      }
+    ]
+  stringSource:
+    patterns: [
+      { include: '#stringReturnFunction' }
+      { include: '#stringConstant' }
+      { include: '#stringVariableName' }
+      { include: '#stringOperation' }
+    ]
+  stringOperation:
+    patterns: [
+      {
+        begin: '\\('
+        end: '\\)'
+        patterns: [
+          { include: '#stringSource' }
+        ]
+      }
+      {
+        match: '[+]'
+      }
+    ]
+  stringReturnFunction:
+    patterns: [
+      {
+        begin: '(CHR\\$)'
+        beginCaptures:
+          1:
+            name: 'keyword.chr.ivan'
+        end: '(?=[:;])'
+        patterns: [
+          { include: '#numericOnlySource' }
+        ]
+      }
+      {
+        begin: '(EVAL)'
+        end: '(?=[:;])'
+        beginCaptures:
+          1:
+            name: 'keyword.eval.ivan'
+        patterns: [
+          { include: '#stringSource' }
+        ]
+      }
+      {
+        match: '(GET\\$)'
+        name: 'keyword.io.ivan'
+      }
+      {
+        begin: '(INKEY\\$)\\((.*)\\)'
+        end: '(?=[:;])'
+        beginCaptures:
+          1:
+            name: 'keyword.io.ivan'
+          2:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        begin: '(LEFT\\$|RIGHT\\$)\\((.*),(.*)\\)'
+        end: '(?=[:;])'
+        beginCaptures:
+          1:
+            name: 'keyword.stringfunction.ivan'
+          2:
+            patterns: [
+              { include: '#stringSource' }
+            ]
+          3:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        begin: '(MID\\$)\\((.*),(.*),(.*)\\)'
+        end: '(?=[:;])'
+        beginCaptures:
+          1:
+            name: 'keyword.stringfunction.ivan'
+          2:
+            patterns: [
+              { include: '#stringSource' }
+            ]
+          3:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+          4:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        match: '(STR\\$)(.+)'
+        captures:
+          1:
+            name: 'keyword.ivan'
+          2:
+            patterns: [
+              { include: '#numericSource' }
+            ]
+      }
+      {
+        match: '(STRING\\$)\\((.+),(.+)\\)'
+        captures:
+          1:
+            name: 'keyword.ivan'
+          2:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+          3:
+            patterns: [
+              { include: '#stringSource' }
+            ]
+      }
+    ]
+  numericOnlySource:
+    patterns: [
+      { include: '#numericSource' }
+      { include: '#invalid' }
+    ]
+  numericSource:
+    patterns: [
+      {
+        match: 'FALSE|TRUE'
+        name: 'constant.bool.literal.ivan'
+      }
+      {
+        match: 'PI\\b'
+        name: 'constant.real.literal.ivan'
+      }
+      { include: '#numericReturnFunction' }
+      { include: '#numericConstant' }
+      { include: '#numericOperation' }
+      { include: '#integerVariableName' }
+      { include: '#numericVariableName' }
+    ]
+  numericOperation:
+    patterns: [
+      {
+        begin: '\\('
+        patterns: [
+          { include: '#numericSource' }
+        ]
+        end: '\\)'
+      }
+      {
+        match: '\\+|-|\\*|/'
+        name: 'punctation.math.operator.ivan'
+      }
+      {
+        match: '(NOT|AND|DIV|MOD|OR)'
+        name: 'keyword.ivan'
+      }
+    ]
+  numericReturnFunction:
+    patterns: [
+      {
+        begin: '(ABS|ACS|ASN|ATN|COS|DEG|EXP|INT|LN|LOG|RAD|RND|SGN|SIN|SQR|TAN)'
+        end: '(?=[:;)])'
+        beginCaptures:
+          1:
+            name: 'keyword.math.ivan'
+        patterns: [
+          { include: '#numericOnlySource' }
+        ]
+      }
+      {
+        begin: '(ADVAL|EXT)'
+        end: '(?=[:;])'
+        beginCaptures:
+          1:
+            name: 'keyword.io.ivan'
+        patterns: [
+          { include: '#numericOnlySource' }
+        ]
+      }
+      {
+        begin: '(ASC|LEN)'
+        end: '(?=[:;])'
+        beginCaptures:
+          1:
+            name: 'keyword.ivan'
+        patterns: [
+          { include: '#stringSource' }
+        ]
+      }
+      {
+        match: 'COUNT|GET|POS|VPOS'
+        name: 'keyword.io.ivan'
+      }
+      {
+        match: 'ERL|ERR'
+        name: 'keyword.error.ivan'
+      }
+      {
+        begin: '(EVAL)'
+        end: '(?=[:;])'
+        beginCaptures:
+          1:
+            name: 'keyword.eval.ivan'
+        patterns: [
+          { include: '#stringSource' }
+        ]
+      }
+      {
+        match: '(INKEY)\\((.*)\\)'
+        captures:
+          1:
+            name: 'keyword.io.ivan'
+          2:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        match: '(INSTR)\\((.+),(.+),(.+)\\)'
+        captures:
+          1:
+            name: 'keyword.stringfunction.ivan'
+          2:
+            patterns: [
+              { include: '#stringSource' }
+            ]
+          3:
+            patterns: [
+              { include: '#stringSource' }
+            ]
+          4:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        match: '(INSTR)\\((.+),(.+)\\)'
+        captures:
+          1:
+            name: 'keyword.stringfunction.ivan'
+          2:
+            patterns: [
+              { include: '#stringSource' }
+            ]
+          3:
+            patterns: [
+              { include: '#stringSource' }
+            ]
+      }
+      {
+        match: '(OPENIN|OPENOUT)(.+)'
+        captures:
+          1:
+            name: 'keyword.io.ivan'
+          2:
+            patterns: [
+              { include: '#stringSource' }
+            ]
+      }
+      {
+        match: '(BGET\\s*[#])\\s*(.+)'
+        captures:
+          1:
+            name: 'keyword.io.ivan'
+          2:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        match: '(POINT)\\((.+),(.+)\\)'
+        captures:
+          1:
+            name: 'keyword.stringfunction.ivan'
+          2:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+          3:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        match: '(VAL\\s*[(](.*?)[)])'
+        captures:
+          1:
+            name: 'keyword.stringfunction.ivan'
+          2:
+            patterns: [
+              { include: '#stringSource' }
+            ]
+      }
+      {
+        match: '(VAL)(.*)'
+        captures:
+          1:
+            name: 'keyword.stringfunction.ivan'
+        patterns: [
+          { include: '#stringSource' }
+        ]
+      }
+    ]
+  numericConstant:
+    patterns: [
+      {
+        match: '[-]?[0-9]*\\.?[0-9]+'
+        name: 'constant.numeric.decimal.ivan'
+      }
+      {
+        match: '&[0-9A-F]+'
+        name: 'constant.numeric.hex.ivan'
+      }
+    ]
+  stringConstant:
+    begin: '"'
+    end: '"'
+    name: 'string.quoted.double.ivan'
+
+  variableName:
+    patterns: [
+      { include: '#stringVariableName' }
+      { include: '#integerVariableName' }
+      { include: '#numericVariableName' }
+    ]
+  stringVariableName:
+    match: '[A-Za-z]+[0-9A-Za-z_]*[$]'
+    name: 'entity.string.variable.name'
+  integerVariableName:
+    match: '([A-Za-z]+[0-9A-Za-z_]*[%])|(@%)'
+    name: 'entity.numeric.integer.variable.name'
+  numericVariableName:
+    match: '[A-Za-z]+[0-9A-Za-z_]*'
+    name: 'entity.numeric.variable.name'
+
+  formatFunctions:
+    patterns: [
+      { match: '\\s*;\\s' }
+      {
+        match: '(SPC)(.+)'
+        captures:
+          1:
+            name: 'keyword.ivan'
+          2:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        match: '(TAB)\\((.+?),(.+?)\\)'
+        captures:
+          1:
+            name: 'keyword.io.ivan'
+          2:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+          3:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+      }
+      {
+        match: '(TAB)\\((.+)\\)'
+        captures:
+          1:
+            name: 'keyword.io.ivan'
+          2:
+            patterns: [
+              { include: '#numericOnlySource' }
+            ]
+      }
+    ]
+numericCommaList:
+  name: 'meta.numeric.comma.list.ivan'
+  match: ',(.+)'
+  captures:
+    1:
+      patterns: [
+        { include: '#numericSource' }
+        { include: '#numericCommaList' }
+      ]
