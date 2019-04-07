@@ -3,7 +3,6 @@ fileTypes: [
   ".ivan",
   ".txt
 ]
-name: "Ivan"
 patterns: [
   { include: "#line" }
 ]
