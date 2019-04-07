@@ -1,7 +1,7 @@
 scopeName: "source.ivan"
 fileTypes: [
-  ".ivan",
-  ".txt
+  "ivan",
+  "txt
 ]
 patterns: [
   { include: "#line" }
